@@ -35,11 +35,13 @@ async def handleAudioMessage(conn, audio):
         conn.asr_audio.clear()
         conn.reset_vad_states()
 
+
 async def startToChat(conn, text):
     # 异步发送 stt 信息
-    asyncio.create_task(
+    stt_task = asyncio.create_task(
         schedule_with_interrupt(0, send_stt_message(conn, text))
     )
+    conn.scheduled_tasks.append(stt_task)
     conn.executor.submit(conn.chat, text)
 
 
@@ -52,7 +54,10 @@ async def sendAudioMessage(conn, audios, duration, text):
         conn.tts_start_speak_time = time.time()
 
     # 发送 sentence_start（每个音频文件之前发送一次）
-    await send_tts_message(conn, "sentence_start", text)
+    sentence_task = asyncio.create_task(
+        schedule_with_interrupt(base_delay, send_tts_message(conn, "sentence_start", text))
+    )
+    conn.scheduled_tasks.append(sentence_task)
 
     conn.tts_duration += duration
 
@@ -60,16 +65,13 @@ async def sendAudioMessage(conn, audios, duration, text):
     for idx, opus_packet in enumerate(audios):
         await conn.websocket.send(opus_packet)
 
-        # 每个音频文件发送结束时，发送 sentence_end
-        if idx == len(audios) - 1:
-            await send_tts_message(conn, "sentence_end", text)
-
     if conn.llm_finish_task and text == conn.tts_last_text:
         stop_duration = conn.tts_duration - (time.time() - conn.tts_start_speak_time)
         stop_task = asyncio.create_task(
             schedule_with_interrupt(stop_duration, send_tts_message(conn, 'stop'))
         )
         conn.scheduled_tasks.append(stop_task)
+
 
 async def send_tts_message(conn, state, text=None):
     """发送 TTS 状态消息"""
@@ -84,6 +86,7 @@ async def send_tts_message(conn, state, text=None):
     await conn.websocket.send(json.dumps(message))
     if state == "stop":
         conn.clearSpeakStatus()
+
 
 async def send_stt_message(conn, text):
     """发送 STT 状态消息"""

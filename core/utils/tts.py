@@ -12,7 +12,8 @@ import requests
 from core.utils.util import read_config, get_project_dir
 from pydub import AudioSegment
 from abc import ABC, abstractmethod
-
+from pydub.utils import which
+AudioSegment.ffmpeg = which("ffmpeg")
 logger = logging.getLogger(__name__)
 
 
@@ -26,15 +27,16 @@ class TTS(ABC):
         pass
 
     def to_tts(self, text):
+        logger.info(f"语音生成: {text}")
         tmp_file = self.generate_filename()
         try:
-            max_repeat_time = 5
-            while not os.path.exists(tmp_file) and max_repeat_time > 0:
-                asyncio.run(self.text_to_speak(text, tmp_file))
-                if not os.path.exists(tmp_file):
-                    max_repeat_time = max_repeat_time - 1
-                    logger.error(f"语音生成失败: {text}:{tmp_file}，再试{max_repeat_time}次")
-
+            # max_repeat_time = 5
+            # while not os.path.exists(tmp_file) and max_repeat_time > 0:
+            #     asyncio.run(self.text_to_speak(text, tmp_file))
+            #     if not os.path.exists(tmp_file):
+            #         max_repeat_time = max_repeat_time - 1
+            #         logger.error(f"语音生成失败: {text}:{tmp_file}，再试{max_repeat_time}次")
+            asyncio.run(self.text_to_speak(text, tmp_file))
             return tmp_file
         except Exception as e:
             logger.info(f"Failed to generate TTS file: {e}")
@@ -149,11 +151,68 @@ class DoubaoTTS(TTS):
             file_to_save.write(base64.b64decode(data))
 
 
+class GPT_SoVITS_V2(TTS):
+    def __init__(self, config, delete_audio_file):
+        super().__init__(config, delete_audio_file)
+        self.url = config.get("url", "http://127.0.0.1:9880/tts")
+        self.text_lang = config.get("text_lang", "zh")
+        self.ref_audio_path = config.get("ref_audio_path")
+        self.prompt_text = config.get("prompt_text")
+        self.prompt_lang = config.get("prompt_lang", "zh")
+        self.top_k = config.get("top_k", 5)
+        self.top_p = config.get("top_p", 1)
+        self.temperature = config.get("temperature", 1)
+        self.text_split_method = config.get("text_split_method", "cut0")
+        self.batch_size = config.get("batch_size", 1)
+        self.batch_threshold = config.get("batch_threshold", 0.75)
+        self.split_bucket = config.get("split_bucket", True)
+        self.return_fragment = config.get("return_fragment", False)
+        self.speed_factor = config.get("speed_factor", 1.0)
+        self.streaming_mode = config.get("streaming_mode", False)
+        self.seed = config.get("seed", -1)
+        self.parallel_infer = config.get("parallel_infer", True)
+        self.repetition_penalty = config.get("repetition_penalty", 1.35)
+        self.aux_ref_audio_paths = config.get("aux_ref_audio_paths", [])
+
+    def generate_filename(self, extension=".wav"):
+        return os.path.join(self.output_file, f"tts-{datetime.now().date()}@{uuid.uuid4().hex}{extension}")
+
+    async def text_to_speak(self, text, output_file):
+        request_json = {
+            "text": text,
+            "text_lang": self.text_lang,
+            "ref_audio_path": self.ref_audio_path,
+            "aux_ref_audio_paths": self.aux_ref_audio_paths,
+            "prompt_text": self.prompt_text,
+            "prompt_lang": self.prompt_lang,
+            "top_k": self.top_k,
+            "top_p": self.top_p,
+            "temperature": self.temperature,
+            "text_split_method": self.text_split_method,
+            "batch_size": self.batch_size,
+            "batch_threshold": self.batch_threshold,
+            "split_bucket": self.split_bucket,
+            "return_fragment": self.return_fragment,
+            "speed_factor": self.speed_factor,
+            "streaming_mode": self.streaming_mode,
+            "seed": self.seed,
+            "parallel_infer": self.parallel_infer,
+            "repetition_penalty": self.repetition_penalty
+        }
+
+        resp = requests.post(self.url, json=request_json)
+        if resp.status_code == 200:
+            with open(output_file, "wb") as file:
+                file.write(resp.content)
+        else:
+            logger.error(f"GPT_SoVITS_V2 TTS请求失败: {resp.status_code} - {resp.text}")
+
+
 def create_instance(class_name, *args, **kwargs):
-    # 获取类对象
     cls_map = {
         "DoubaoTTS": DoubaoTTS,
         "EdgeTTS": EdgeTTS,
+        "GPT_SoVITS_V2": GPT_SoVITS_V2,
         # 可扩展其他TTS实现
     }
 

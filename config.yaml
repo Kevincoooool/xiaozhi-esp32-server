@@ -27,7 +27,9 @@ delete_audio: true
 selected_module:
   ASR: FunASR
   VAD: SileroVAD
+  # 将根据配置名称对应的type调用实际的LLM适配器
   LLM: ChatGLMLLM
+  # TTS将根据配置名称对应的type调用实际的TTS适配器
   TTS: EdgeTTS
 
 ASR:
@@ -42,31 +44,46 @@ VAD:
     min_silence_duration_ms: 700  # 如果说话停顿比较长，可以把这个值设置大一些
 
 LLM:
+  # 当前支持的type为openai、dify，可自行适配
   AliLLM:
+    # 定义LLM API类型
+    type: openai
     # 可在这里找到你的 api_key https://bailian.console.aliyun.com/?apiKey=1#/api-key
     base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
     model_name: qwen-turbo
     api_key: 你的阿里云dashscope api key
   DeepSeekLLM:
+    # 定义LLM API类型
+    type: openai
     # 可在这里找到你的api key https://platform.deepseek.com/
     model_name: deepseek-chat
     url: https://api.deepseek.com
     api_key: 你的deepseek api key
   ChatGLMLLM:
+    # 定义LLM API类型
+    type: openai
+    # glm-4-flash 是免费的，但是还是需要注册填写api_key的
     # 可在这里找到你的api key https://bigmodel.cn/usercenter/proj-mgmt/apikeys
     model_name: glm-4-flash
     url: https://open.bigmodel.cn/api/paas/v4/
     api_key: 你的bigmodel api key
   DifyLLM:
+    # 定义LLM API类型
+    type: dify
     # 建议使用本地部署的dify接口，国内部分区域访问dify公有云接口可能会受限
     # 如果使用DifyLLM，配置文件里prompt(提示词)是无效的，需要在dify控制台设置提示词
     base_url: 你的私有化部署的dify接口地址
     api_key: 你的dify api key
 TTS:
+  # 当前支持的type为edge、doubao，可自行适配
   EdgeTTS:
+    # 定义TTS API类型
+    type: edge
     voice: zh-CN-XiaoxiaoNeural
     output_file: tmp/
   DoubaoTTS:
+    # 定义TTS API类型
+    type: doubao
     # 火山引擎语音合成服务，需要先在火山引擎控制台创建应用并获取appid和access_token
     # 山引擎语音一定要购买花钱，起步价30元，就有100并发了。如果用免费的只有2个并发，会经常报tts错误
     # 购买服务后，购买免费的音色后，可能要等半小时左右，才能使用。
