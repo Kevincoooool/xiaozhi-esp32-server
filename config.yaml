@@ -28,9 +28,9 @@ selected_module:
   ASR: FunASR
   VAD: SileroVAD
   # 将根据配置名称对应的type调用实际的LLM适配器
-  LLM: ChatGLMLLM
+  LLM: DifyLLM
   # TTS将根据配置名称对应的type调用实际的TTS适配器
-  TTS: EdgeTTS
+  TTS: GPT_SOVITS_V2
 
 ASR:
   FunASR:
@@ -72,8 +72,8 @@ LLM:
     type: dify
     # 建议使用本地部署的dify接口，国内部分区域访问dify公有云接口可能会受限
     # 如果使用DifyLLM，配置文件里prompt(提示词)是无效的，需要在dify控制台设置提示词
-    base_url: 你的私有化部署的dify接口地址
-    api_key: 你的dify api key
+    base_url: http://127.0.0.1/v1
+    api_key: app-GXjsZAQL9mk38qY5dBNPj18O
 TTS:
   # 当前支持的type为edge、doubao，可自行适配
   EdgeTTS:
@@ -93,3 +93,26 @@ TTS:
     appid: 你的火山引擎语音合成服务appid
     access_token: 你的火山引擎语音合成服务access_token
     cluster: volcano_tts
+  GPT_SOVITS_V2:
+    # 定义TTS API类型
+    type: gpt_sovits_v2
+    url: "http://127.0.0.1:9880/tts"
+    output_file: tmp/
+    text_lang: "auto"
+    ref_audio_path: "caixukun.wav"
+    prompt_text: ""
+    prompt_lang: "zh"
+    top_k: 5
+    top_p: 1
+    temperature: 1
+    text_split_method: "cut0"
+    batch_size: 1
+    batch_threshold: 0.75
+    split_bucket: true
+    return_fragment: false
+    speed_factor: 1.0
+    streaming_mode: false
+    seed: -1
+    parallel_infer: true
+    repetition_penalty: 1.35
+    aux_ref_audio_paths: []
