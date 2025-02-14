@@ -21,7 +21,7 @@ RUN pip install --no-cache-dir -r requirements.txt -i https://mirrors.aliyun.com
 # 第二阶段：生产镜像
 FROM python:3.10-slim
 
-WORKDIR /opt/xiaozhi-es32-server
+WORKDIR /opt/xiaozhi-esp32-server
 
 # 从构建阶段复制虚拟环境
 COPY --from=builder /opt/venv /opt/venv

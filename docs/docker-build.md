@@ -13,9 +13,7 @@ docker build -t xiaozhi-esp32-server:local -f ./Dockerfile .
 docker stop xiaozhi-esp32-server
 docker rm xiaozhi-esp32-server
 
-cd /Users/hrz/myworkspace/docker-java-env/thirddata/
-cp /Users/hrz/myworkspace/esp32/xiaozhi-esp32-server/config.yaml ./
-docker run -d --name xiaozhi-esp32-server --restart always -p 8000:8000 -v $(pwd)/config.yaml:/opt/xiaozhi-es32-server/config.yaml xiaozhi-esp32-server:local
+docker run -d --name xiaozhi-esp32-server --restart always -p 8000:8000 -v $(pwd)/.config.yaml:/opt/xiaozhi-esp32-server/config.yaml xiaozhi-esp32-server:local
 
 docker logs -f xiaozhi-esp32-server
 
@@ -40,6 +38,6 @@ docker manifest push ccr.ccs.tencentyun.com/xinnan/xiaozhi-esp32-server:latest
 6、运行线上镜像
 ```
 cd /Users/hrz/myworkspace/docker-java-env/thirddata/
-docker run -d --name xiaozhi-esp32-server --restart always -p 8000:8000 -v $(pwd)/config.yaml:/opt/xiaozhi-es32-server/config.yaml ccr.ccs.tencentyun.com/xinnan/xiaozhi-esp32-server:latest
+docker run -d --name xiaozhi-esp32-server --restart always -p 8000:8000 -v $(pwd)/config.yaml:/opt/xiaozhi-esp32-server/config.yaml ccr.ccs.tencentyun.com/xinnan/xiaozhi-esp32-server:latest
 docker logs -f xiaozhi-esp32-server
 ```

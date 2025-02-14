@@ -25,11 +25,17 @@ class WebSocketServer:
                 self.config["delete_audio"]
             ),
             llm.create_instance(
-                self.config["selected_module"]["LLM"],
+                self.config["selected_module"]["LLM"]
+                if not 'type' in self.config["LLM"][self.config["selected_module"]["LLM"]]
+                else
+                self.config["LLM"][self.config["selected_module"]["LLM"]]['type'],
                 self.config["LLM"][self.config["selected_module"]["LLM"]],
             ),
             tts.create_instance(
-                self.config["selected_module"]["TTS"],
+                self.config["selected_module"]["TTS"]
+                if not 'type' in self.config["TTS"][self.config["selected_module"]["TTS"]]
+                else
+                self.config["TTS"][self.config["selected_module"]["TTS"]]["type"],
                 self.config["TTS"][self.config["selected_module"]["TTS"]],
                 self.config["delete_audio"]
             )

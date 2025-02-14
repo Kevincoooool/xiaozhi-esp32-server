@@ -1,8 +1,7 @@
-import yaml
-import unicodedata
-import socket
 import os
 import json
+import yaml
+import socket
 
 
 def get_project_dir():
@@ -41,6 +40,7 @@ def is_segment(tokens):
     else:
         return False
 
+
 def is_punctuation_or_emoji(char):
     """检查字符是否为空格、指定标点或表情符号"""
     # 定义需要去除的中英文标点（包括全角/半角）
@@ -49,7 +49,7 @@ def is_punctuation_or_emoji(char):
         '。', '.',  # 中文句号 + 英文句号
         '！', '!',  # 中文感叹号 + 英文感叹号
         '-', '－',  # 英文连字符 + 中文全角横线
-        '、'         # 中文顿号
+        '、'  # 中文顿号
     }
     if char.isspace() or char in punctuation_set:
         return True
@@ -63,6 +63,7 @@ def is_punctuation_or_emoji(char):
     ]
     return any(start <= code_point <= end for start, end in emoji_ranges)
 
+
 def get_string_no_punctuation_or_emoji(s):
     """去除字符串首尾的空格、标点符号和表情符号"""
     chars = list(s)
@@ -74,7 +75,8 @@ def get_string_no_punctuation_or_emoji(s):
     end = len(chars) - 1
     while end >= start and is_punctuation_or_emoji(chars[end]):
         end -= 1
-    return ''.join(chars[start:end+1])
+    return ''.join(chars[start:end + 1])
+
 
 def remove_punctuation_and_length(text):
     # 全角符号和半角符号的Unicode范围

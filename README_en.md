@@ -44,7 +44,7 @@ use it in the production environment.
 - `xiaozhi-esp32` WebSocket communication protocol
 - Supports wake-word initiated dialogue, manual dialogue, and real-time interruption of dialogue.
 - Support for 5 languages: Mandarin, Cantonese, English, Japanese, Korean (FunASR - default)
-- Flexible LLM switching (ChatGLM - default, Aliyun, Dify, DeepSeek)
+- Flexible LLM switching (openai:ChatGLM - default, Aliyun, DeepSeek; dify:Dify)
 - Flexible TTS switching (EdgeTTS - default, ByteDance Doubao TTS)
 
 ## In Progress
@@ -57,14 +57,16 @@ use it in the production environment.
 
 | Type | Service    |  Usage   | Pricing Model	 | Notes                                                                      |
 |:-----|:-----------|:--------:|:---------------|:---------------------------------------------------------------------------|
-| LLM  | Aliyun     | API call | Token-based    | [Apply for API Key](https://bailian.console.aliyun.com/?apiKey=1#/api-key) |
-| LLM  | DeepSeek   | API call | Token-based    | [Apply for API Key](https://platform.deepseek.com/)                        |
-| LLM  | Dify       | API call | Token-based    | Self-hosted                                                                |
-| LLM  | Bigmodel   | API call | Free           | [Create API Key](https://bigmodel.cn/usercenter/proj-mgmt/apikeys)         |
+| LLM  | Aliyun     | openai API call | Token-based    | [Apply for API Key](https://bailian.console.aliyun.com/?apiKey=1#/api-key) |
+| LLM  | DeepSeek   | openai API call | Token-based    | [Apply for API Key](https://platform.deepseek.com/)                        |
+| LLM  | Bigmodel   | openai API call | Free           | [Create API Key](https://bigmodel.cn/usercenter/proj-mgmt/apikeys)         |
+| LLM  | Dify       | dify API call | Token-based    | Self-hosted                                                                |
 | TTS  | HuoshanTTS | API call | Token-based    | [Create API Key](https://console.volcengine.com/speech/service/8)          |
 | TTS  | EdgeTTS    | API call | Free           |                                                                            |
 | VAD  | SileroVAD  |  Local   | Free           |                                                                            |
 | ASR  | FunASR     |  Local   | Free           |                                                                            |
+
+In fact, any LLM that supports OpenAI API calls can be integrated and used.
 
 # Deployment
 
@@ -117,18 +119,22 @@ selected_module:
   TTS: EdgeTTS
 ```
 
-For example, modify the components used by `llm`, depending on which` llm` supports this project, as follows, it
-supports `Deepseekllm` and` Chatglmllm`. You are modified to the corresponding LLM in `selectd_module`
+For example, to modify the components used by the `LLM`, it depends on which `LLM` API interfaces are supported by this project. Currently, the supported ones are `openai` and `dify`. We welcome validation and support for more LLM platforms' interfaces.
+When using it, change the `selected_module` to the corresponding name of the following LLM configurations:
 
 ```
 LLM:
   AliLLM:
+    type: openai
     ...
   DeepSeekLLM:
+    type: openai
     ...
   ChatGLMLLM:
+    type: openai
     ...
   DifyLLM:
+    type: openai
     ...
 ```
 
@@ -150,7 +156,7 @@ If you can see the `config.yaml` file, you have indeed entered the `project dire
 command:
 
 ```
-docker run -d --name xiaozhi-esp32-server --restart always --security-opt seccomp:unconfined -p 8000:8000 -v $(pwd)/config.yaml:/opt/xiaozhi-es32-server/config.yaml ccr.ccs.tencentyun.com/xinnan/xiaozhi-esp32-server:latest
+docker run -d --name xiaozhi-esp32-server --restart always --security-opt seccomp:unconfined -p 8000:8000 -v $(pwd)/config.yaml:/opt/xiaozhi-esp32-server/config.yaml ccr.ccs.tencentyun.com/xinnan/xiaozhi-esp32-server:latest
 ```
 
 If executed for the first time, it may take several minutes, and you have to be patient to wait for it to complete the
@@ -254,16 +260,22 @@ selected_module:
   TTS: EdgeTTS
 ```
 
-For example, modify the components used by `llm`, depending on which` llm` supports this project, as follows, it
-supports `Deepseekllm` and` Chatglmllm`. You are modified to the corresponding LLM in `selectd_module`
+For example, to modify the components used by the `LLM`, it depends on which `LLM` API interfaces are supported by this project. Currently, the supported ones are `openai` and `dify`. We welcome validation and support for more LLM platforms' interfaces.
+When using it, change the `selected_module` to the corresponding name of the following LLM configurations:
 
 ```
 LLM:
+  AliLLM:
+    type: openai
+    ...
   DeepSeekLLM:
+    type: openai
     ...
   ChatGLMLLM:
+    type: openai
     ...
   DifyLLM:
+    type: openai
     ...
 ```
 
