@@ -44,9 +44,9 @@ selected_module:
   ASR: FunASR
   VAD: SileroVAD
   # 将根据配置名称对应的type调用实际的LLM适配器
-  LLM: DifyLLM
+  LLM: CozeLLM
   # TTS将根据配置名称对应的type调用实际的TTS适配器
-  TTS: GPT_SOVITS_V2
+  TTS: EdgeTTS
 
 ASR:
   FunASR:
@@ -93,8 +93,15 @@ LLM:
     type: dify
     # 建议使用本地部署的dify接口，国内部分区域访问dify公有云接口可能会受限
     # 如果使用DifyLLM，配置文件里prompt(提示词)是无效的，需要在dify控制台设置提示词
-    base_url: http://127.0.0.1/v1
-    api_key: app-GXjsZAQL9mk38qY5dBNPj18O
+    base_url: https://api.dify.cn/v1
+    api_key: 你的DifyLLM api key
+  CozeLLM:
+    # 定义LLM API类型
+    type: coze
+    bot_id: 你的bot_id
+    user_id: 你的user_id
+    base_url:   # 服务地址
+    personal_access_token: 你的coze个人令牌
 TTS:
   # 当前支持的type为edge、doubao，可自行适配
   EdgeTTS:

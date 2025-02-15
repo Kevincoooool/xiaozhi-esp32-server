@@ -15,14 +15,30 @@ logger = logging.getLogger(__name__)
 
 
 def create_instance(class_name, *args, **kwargs):
+    # 获取所有支持的LLM类型列表
+    supported_llm_types = []
+    llm_dir = os.path.join('core', 'providers', 'llm')
+    if os.path.exists(llm_dir):
+        for item in os.listdir(llm_dir):
+            item_path = os.path.join(llm_dir, item)
+            if os.path.isdir(item_path) and os.path.exists(os.path.join(item_path, f'{item}.py')):
+                supported_llm_types.append(item)
+
+    # 打印所有支持的LLM类型列表
+    logger.info(f"所有支持的LLM类型列表: {supported_llm_types}")
+    logger.info(f"您设置的llm: {class_name}")
+
     # 创建LLM实例
-    if os.path.exists(os.path.join('core', 'providers', 'llm', class_name, f'{class_name}.py')):
+    if class_name in supported_llm_types:
         lib_name = f'core.providers.llm.{class_name}.{class_name}'
         if lib_name not in sys.modules:
             sys.modules[lib_name] = importlib.import_module(f'{lib_name}')
-            return sys.modules[lib_name].LLMProvider(*args, **kwargs)
+        # 打印实际用到的LLM类型
+        logger.info(f"实际用到的LLM类型: {class_name}")
+        return sys.modules[lib_name].LLMProvider(*args, **kwargs)
 
     raise ValueError(f"不支持的LLM类型: {class_name}，请检查该配置的type是否设置正确")
+
 
 
 if __name__ == "__main__":
