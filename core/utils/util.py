@@ -5,9 +5,8 @@ import socket
 
 
 def get_project_dir():
-    projectName = 'xiaozhi-esp32-server'
-    filePath = os.path.abspath(__file__)
-    return filePath[:filePath.rfind('/' + projectName + '/') + len(projectName) + 2]
+    """获取项目根目录"""
+    return os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + '/'
 
 
 def get_local_ip():
@@ -91,4 +90,4 @@ def remove_punctuation_and_length(text):
 
     if result == "Yeah":
         return 0
-    return len(result)
+    return len(result), result

@@ -15,12 +15,14 @@ from core.handle.textHandle import handleTextMessage
 from core.utils.util import get_string_no_punctuation_or_emoji
 from concurrent.futures import ThreadPoolExecutor, TimeoutError
 from core.handle.audioHandle import handleAudioMessage, sendAudioMessage
+from .auth import AuthMiddleware, AuthenticationError
 
 
 class ConnectionHandler:
     def __init__(self, config: Dict[str, Any], _vad, _asr, _llm, _tts):
         self.config = config
         self.logger = logging.getLogger(__name__)
+        self.auth = AuthMiddleware(config)
 
         self.websocket = None
         self.headers = None
@@ -66,28 +68,49 @@ class ConnectionHandler:
         self.tts_start_speak_time = None
         self.tts_duration = 0
 
+        self.cmd_exit = self.config["CMD_exit"]
+        self.max_cmd_length = 0
+        for cmd in self.cmd_exit:
+            if len(cmd) > self.max_cmd_length:
+                self.max_cmd_length = len(cmd)
+
     async def handle_connection(self, ws):
-        self.websocket = ws
-        """处理单个WebSocket连接"""
-        self.headers = dict(self.websocket.request.headers)
-        self.logger.info(f"连接建立，请求头：\n{self.headers}")
-
-        self.welcome_msg = self.config["xiaozhi"]
-        self.session_id = str(uuid.uuid4())
-        self.welcome_msg["session_id"] = self.session_id
-        await self.websocket.send(json.dumps(self.welcome_msg))
-
-        await self.loop.run_in_executor(None, self._initialize_components)
-
-        tts_priority = threading.Thread(target=self._priority_thread, daemon=True)
-        tts_priority.start()
-
         try:
-            async for message in self.websocket:
-                await self._route_message(message)
-        except websockets.exceptions.ConnectionClosed:
-            self.logger.info("客户端断开连接")
-            await self.close()
+            # 获取并验证headers
+            self.headers = dict(ws.request.headers)
+            self.logger.info(f"New connection request - Headers: {self.headers}")
+
+            # 进行认证
+            await self.auth.authenticate(self.headers)
+
+            # 认证通过,继续处理
+            self.websocket = ws
+            self.session_id = str(uuid.uuid4())
+
+            self.welcome_msg = self.config["xiaozhi"]
+            self.welcome_msg["session_id"] = self.session_id
+            await self.websocket.send(json.dumps(self.welcome_msg))
+
+            await self.loop.run_in_executor(None, self._initialize_components)
+
+            tts_priority = threading.Thread(target=self._priority_thread, daemon=True)
+            tts_priority.start()
+
+            try:
+                async for message in self.websocket:
+                    await self._route_message(message)
+            except websockets.exceptions.ConnectionClosed:
+                self.logger.info("客户端断开连接")
+                await self.close()
+
+        except AuthenticationError as e:
+            self.logger.error(f"Authentication failed: {str(e)}")
+            await ws.close()
+            return
+        except Exception as e:
+            self.logger.error(f"Connection error: {str(e)}")
+            await ws.close()
+            return
 
     async def _route_message(self, message):
         """消息路由"""
@@ -140,9 +163,10 @@ class ConnectionHandler:
         # 处理剩余的响应
         if start < len(response_message):
             segment_text = "".join(response_message[start:])
-            self.recode_first_last_text(segment_text)
-            future = self.executor.submit(self.speak_and_play, segment_text)
-            self.tts_queue.put(future)
+            if len(segment_text) > 0:
+                self.recode_first_last_text(segment_text)
+                future = self.executor.submit(self.speak_and_play, segment_text)
+                self.tts_queue.put(future)
 
         self.llm_finish_task = True
         # 更新对话
@@ -161,6 +185,11 @@ class ConnectionHandler:
                 try:
                     self.logger.debug("正在处理TTS任务...")
                     tts_file, text = future.result(timeout=10)
+                    if text is None or len(text) <= 0:
+                        continue
+                    if tts_file is None:
+                        self.logger.error(f"TTS文件生成失败: {text}")
+                        continue
                     self.logger.debug(f"TTS文件生成完毕，文件路径: {tts_file}")
                     if os.path.exists(tts_file):
                         opus_datas, duration = self.tts.wav_to_opus_data(tts_file)
@@ -193,11 +222,11 @@ class ConnectionHandler:
     def speak_and_play(self, text):
         if text is None or len(text) <= 0:
             self.logger.info(f"无需tts转换，query为空，{text}")
-            return None
+            return None, text
         tts_file = self.tts.to_tts(text)
         if tts_file is None:
             self.logger.error(f"tts转换失败，{text}")
-            return None
+            return None, text
         self.logger.debug(f"TTS 文件生成完毕: {tts_file}")
         return tts_file, text
 

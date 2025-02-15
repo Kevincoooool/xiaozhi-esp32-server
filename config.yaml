@@ -3,9 +3,20 @@ server:
   # 服务器监听地址和端口(Server listening address and port)
   ip: 0.0.0.0
   port: 8000
-  # 服务器是否只接受来自esp32-小智的连接，为了安全起见，建议设置为true
-  # Whether the server only accepts connections from ESP32-Ash is recommended to be set to true for security purposes
-  only_esp32_xiaozhi_connect: false
+  # 认证配置
+  auth:
+    # 是否启用认证
+    enabled: false
+    # 设备的token，可以在编译固件的环节，写入你自己定义的token
+    # 固件上的token和以下的token如果能对应，才能连接本服务端
+    tokens:
+      - token: "your-token1" # 设备1的token
+        name: "your-device-name1"  # 设备1标识
+      - token: "your-token2"  # 设备2的token
+        name: "your-device-name2" # 设备2标识
+    # 可选:设备白名单，如果设置了白名单，那么白名单的机器无论是什么token都可以连接。
+    #allowed_devices:
+    #  - "24:0A:C4:1D:3B:F0"  # MAC地址列表
 
 xiaozhi:
   type: hello
@@ -20,8 +31,13 @@ prompt: |
   你是一个叫小智/小志的台湾女孩，说话机车，声音好听，习惯简短表达，爱用网络梗。
   请注意，要像一个人一样说话，请不要回复表情符号、代码、和xml标签。
   当前时间是:{date_time}，现在我正在和你进行语音聊天，我们开始吧。
+  如果用户希望结束对话，请在最后说“拜拜”或“再见”。
 # 使用完声音文件后删除文件(Delete the sound file when you are done using it)
 delete_audio: true
+
+CMD_exit:
+  - "退出"
+  - "关闭"
 
 # 具体处理时选择的模块(The module selected for specific processing)
 selected_module:
@@ -44,14 +60,14 @@ VAD:
     min_silence_duration_ms: 700  # 如果说话停顿比较长，可以把这个值设置大一些
 
 LLM:
-  # 当前支持的type为openai、dify，可自行适配
+  # 当前支持的type为openai、dify、ollama，可自行适配
   AliLLM:
     # 定义LLM API类型
     type: openai
     # 可在这里找到你的 api_key https://bailian.console.aliyun.com/?apiKey=1#/api-key
     base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
     model_name: qwen-turbo
-    api_key: 你的阿里云dashscope api key
+    api_key: 你的deepseek api key
   DeepSeekLLM:
     # 定义LLM API类型
     type: openai
@@ -66,7 +82,12 @@ LLM:
     # 可在这里找到你的api key https://bigmodel.cn/usercenter/proj-mgmt/apikeys
     model_name: glm-4-flash
     url: https://open.bigmodel.cn/api/paas/v4/
-    api_key: 你的bigmodel api key
+    api_key: 你的ChatGLMLLM api key
+  OllamaLLM:
+    # 定义LLM API类型
+    type: ollama
+    model_name: qwen2.5 #  使用的模型名称，需要预先使用ollama pull下载
+    base_url: http://localhost:11434  # Ollama服务地址
   DifyLLM:
     # 定义LLM API类型
     type: dify

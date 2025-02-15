@@ -27,13 +27,63 @@ async def handleAudioMessage(conn, audio):
         conn.asr_server_receive = False
         text, file_path = conn.asr.speech_to_text(conn.asr_audio, conn.session_id)
         logger.info(f"识别文本: {text}")
-        text_len = remove_punctuation_and_length(text)
+        text_len, text_without_punctuation = remove_punctuation_and_length(text)
+        if text_len <= conn.max_cmd_length and await handleCMDMessage(conn, text_without_punctuation):
+            return
         if text_len > 0:
             await startToChat(conn, text)
         else:
             conn.asr_server_receive = True
         conn.asr_audio.clear()
         conn.reset_vad_states()
+
+async def handleCMDMessage(conn, text):
+    cmd_exit = conn.cmd_exit
+    for cmd in cmd_exit:
+        if text == cmd:
+            logger.info("识别到明确的退出命令".format(text))
+            await finishToChat(conn)
+            return True
+    return False
+
+async def finishToChat(conn):
+    await conn.close()
+
+async def isLLMWantToFinsih(conn):
+    first_text = conn.tts_first_text
+    last_text = conn.tts_last_text
+    _, last_text_without_punctuation = remove_punctuation_and_length(last_text)
+    if "再见" in last_text_without_punctuation or "拜拜" in last_text_without_punctuation:
+        return True
+    _, first_text_without_punctuation  = remove_punctuation_and_length(first_text)
+    if "再见" in first_text_without_punctuation or "拜拜" in first_text_without_punctuation:
+        return True
+    return False
+
+async def handleCMDMessage(conn, text):
+    cmd_exit = conn.cmd_exit
+    for cmd in cmd_exit:
+        if text == cmd:
+            logger.info("识别到明确的退出命令".format(text))
+            await finishToChat(conn)
+            return True
+    return False
+
+
+async def finishToChat(conn):
+    await conn.close()
+
+
+async def isLLMWantToFinish(conn):
+    first_text = conn.tts_first_text
+    last_text = conn.tts_last_text
+    _, last_text_without_punctuation = remove_punctuation_and_length(last_text)
+    if "再见" in last_text_without_punctuation or "拜拜" in last_text_without_punctuation:
+        return True
+    _, first_text_without_punctuation = remove_punctuation_and_length(first_text)
+    if "再见" in first_text_without_punctuation or "拜拜" in first_text_without_punctuation:
+        return True
+    return False
 
 
 async def startToChat(conn, text):
@@ -71,6 +121,11 @@ async def sendAudioMessage(conn, audios, duration, text):
             schedule_with_interrupt(stop_duration, send_tts_message(conn, 'stop'))
         )
         conn.scheduled_tasks.append(stop_task)
+        if await isLLMWantToFinish(conn):
+            finish_task = asyncio.create_task(
+                schedule_with_interrupt(stop_duration, finishToChat(conn))
+            )
+            conn.scheduled_tasks.append(finish_task)
 
 
 async def send_tts_message(conn, state, text=None):

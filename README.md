@@ -32,6 +32,17 @@
 
 本项目成立时间较短，还未通过网络安全测评，请勿在生产环境中使用。
 
+如果您在公网环境中部署学习本项目。请务必在配置文件`config.yaml`开启防护。
+
+```
+server:
+  auth:
+    # 开启防护
+    enabled: true  
+```
+
+开启防护后，你要根据自己的情况，要么校验机器的token，要么校验机器的mac地址，详细可看配置。
+
 ## 功能清单
 
 ## 已实现
@@ -50,16 +61,16 @@
 
 ## 本项目支持的平台/组件列表
 
-| 类型  | 平台名称      | 使用方式 | 收费模式    | 备注                                                              |
-|:----|:----------|:----:|:--------|:----------------------------------------------------------------|
+| 类型  | 平台名称      |    使用方式    | 收费模式    | 备注                                                              |
+|:----|:----------|:----------:|:--------|:----------------------------------------------------------------|
 | LLM | 阿里百炼      | openai接口调用 | 消耗token | [点击申请密钥](https://bailian.console.aliyun.com/?apiKey=1#/api-key) |
 | LLM | 深度求索      | openai接口调用 | 消耗token | [点击申请密钥](https://platform.deepseek.com/)                        |
 | LLM | 智谱        | openai接口调用 | 免费      | [点击创建密钥](https://bigmodel.cn/usercenter/proj-mgmt/apikeys)      |
-| LLM | Dify      | dify接口调用 | 消耗token | 本地化部署                                                           |
-| TTS | 火山引擎      | 接口调用 | 消耗token | [点击创建密钥](https://console.volcengine.com/speech/service/8)       |
-| TTS | EdgeTTS   | 接口调用 | 免费      |                                                                 |
-| VAD | SileroVAD | 本地使用 | 免费      |                                                                 |
-| ASR | FunASR    | 本地使用 | 免费      |                                                                 |
+| LLM | Dify      |  dify接口调用  | 消耗token | 本地化部署                                                           |
+| TTS | 火山引擎      |    接口调用    | 消耗token | [点击创建密钥](https://console.volcengine.com/speech/service/8)       |
+| TTS | EdgeTTS   |    接口调用    | 免费      |                                                                 |
+| VAD | SileroVAD |    本地使用    | 免费      |                                                                 |
+| ASR | FunASR    |    本地使用    | 免费      |                                                                 |
 
 实际上，任何支持openai接口调用的LLM，都可以接入使用。
 
@@ -96,7 +107,8 @@ docker镜像已支持x86架构、arm64架构的CPU，支持在国产操作系统
 
 ### 4. 修改配置文件
 
-修改刚才你下载的`config.yaml`文件，配置本项目所需的各种参数。默认的LLM使用的是`ChatGLMLLM`，你需要配置密钥，因为他们的模型，虽然有免费的，但是仍要去[官网](https://bigmodel.cn/usercenter/proj-mgmt/apikeys)注册密钥，才能启动。
+修改刚才你下载的`config.yaml`文件，配置本项目所需的各种参数。默认的LLM使用的是`ChatGLMLLM`
+，你需要配置密钥，因为他们的模型，虽然有免费的，但是仍要去[官网](https://bigmodel.cn/usercenter/proj-mgmt/apikeys)注册密钥，才能启动。
 
 默认的TTS使用的是`EdgeTTS`，这个无需配置，如果你需要更换成`豆包TTS`，则需要配置密钥。
 
@@ -176,7 +188,6 @@ docker logs -f xiaozhi-esp32-server
 
 请注意，你的接口地址是`websocket`协议的地址，你可以使用`apifox`等工具调试。但是不能直接用浏览器打开访问，如果用浏览器打开，日志会显示错误，会让你怀疑是否部署成功了。
 
-
 后期如果想升级版本，可以这么操作
 
 1、备份好`config.yaml`文件，一些关键的配置到时复制到新的`config.yaml`文件里。
@@ -199,7 +210,8 @@ docker rmi ccr.ccs.tencentyun.com/xinnan/xiaozhi-esp32-server:latest
 
 缺点就要下载本项目的代码，还要下载模型文件，如果这个项目不常用，确实会占用您电脑的空间。
 
-下载源码后，需要下载模型文件。 默认使用`SenseVoiceSmall`模型，进行语音转文字。因为模型较大，需要独立下载，下载后把`model.pt`文件放在`model/SenseVoiceSmall`
+下载源码后，需要下载模型文件。 默认使用`SenseVoiceSmall`模型，进行语音转文字。因为模型较大，需要独立下载，下载后把`model.pt`
+文件放在`model/SenseVoiceSmall`
 目录下。下面两个下载路线任选一个。
 
 - 线路一：阿里魔塔下载[SenseVoiceSmall](https://modelscope.cn/models/iic/SenseVoiceSmall/resolve/master/model.pt)
@@ -284,11 +296,13 @@ pip install -r requirements.txt
 目录下。下面两个下载路线任选一个。
 
 - 线路一：阿里魔塔下载[SenseVoiceSmall](https://modelscope.cn/models/iic/SenseVoiceSmall/resolve/master/model.pt)
-- 线路二：百度网盘下载[SenseVoiceSmall](https://pan.baidu.com/share/init?surl=QlgM58FHhYv1tFnUT_A8Sg&pwd=qvna) 提取码:  `qvna`
+- 线路二：百度网盘下载[SenseVoiceSmall](https://pan.baidu.com/share/init?surl=QlgM58FHhYv1tFnUT_A8Sg&pwd=qvna) 提取码:
+  `qvna`
 
 ### 4.配置项目
 
-修改`config.yaml`文件，配置本项目所需的各种参数。默认的LLM使用的是`ChatGLMLLM`，你需要配置密钥，因为他们的模型，虽然有免费的，但是仍要去[官网](https://bigmodel.cn/usercenter/proj-mgmt/apikeys)注册密钥，才能启动。
+修改`config.yaml`文件，配置本项目所需的各种参数。默认的LLM使用的是`ChatGLMLLM`
+，你需要配置密钥，因为他们的模型，虽然有免费的，但是仍要去[官网](https://bigmodel.cn/usercenter/proj-mgmt/apikeys)注册密钥，才能启动。
 默认的TTS使用的是`EdgeTTS`，这个无需配置，如果你需要更换成`豆包TTS`，则需要配置密钥。
 
 ```
@@ -384,7 +398,6 @@ config WEBSOCKET_URL
 
 注意：你的地址是`ws://`开头，不是`wss://`开头，一定不要写错了。
 
-
 3. 设置编译参数
 
 ```
@@ -420,7 +433,8 @@ python release.py
 编译成功后，会在项目根目录下的`build`目录下生成固件文件`merged-binary.bin`。
 这个`merged-binary.bin`就是要烧录到硬件上的固件文件。
 
-注意：如果执行到第二命令后，报了“zip”相关的错误，请忽略这个错误，只要`build`目录下生成固件文件`merged-binary.bin`，对你没有太大影响，请继续。
+注意：如果执行到第二命令后，报了“zip”相关的错误，请忽略这个错误，只要`build`目录下生成固件文件`merged-binary.bin`
+，对你没有太大影响，请继续。
 
 6. 烧录固件
    将esp32设备连接电脑，使用chrome浏览器，打开以下网址
