@@ -1,5 +1,7 @@
 import logging
 from aiohttp import web
+from config.settings import update_config
+from ruamel.yaml.scalarstring import PreservedScalarString
 from manager.api.auth import verify_token
 from manager.api.response import response_unauthorized, response_success, response_error
 
@@ -28,9 +30,13 @@ class PromptApi:
             if 'prompt' not in data:
                 return response_success()
 
-            self.config['prompt'] = data['prompt']
-            return response_success()
+            # 使用PreservedScalarString保留多行文本格式
+            self.config['prompt'] = PreservedScalarString(data['prompt'])
 
+            # 保存到配置文件
+            update_config(self.config)
+
+            return response_success()
         except Exception as e:
             logger.error(f"Failed to update prompt: {e}")
             return response_error(str(e))

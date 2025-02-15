@@ -210,6 +210,15 @@ docker rmi ccr.ccs.tencentyun.com/xinnan/xiaozhi-esp32-server:latest
 
 缺点就要下载本项目的代码，还要下载模型文件，如果这个项目不常用，确实会占用您电脑的空间。
 
+你先要下载本项目源码，源码可以通过`git clone`命令下载，如果你不熟悉`git clone`命令。
+
+你可以用浏览器打开这个地址`https://github.com/xinnan-tech/xiaozhi-esp32-server.git`
+
+打开完，找到页面中一个绿色的按钮，写着`Code`的按钮，点开它，然后你就看到`Download ZIP`的按钮。
+
+点击它，下载本项目源码压缩包。下载到你电脑后，解压它，此时它的名字可能叫`xiaozhi-esp32-server-main`
+你需要把它重命名成`xiaozhi-esp32-server`，好了请记住这个目录，我们暂且称它为`项目目录`。
+
 下载源码后，需要下载模型文件。 默认使用`SenseVoiceSmall`模型，进行语音转文字。因为模型较大，需要独立下载，下载后把`model.pt`
 文件放在`model/SenseVoiceSmall`
 目录下。下面两个下载路线任选一个。
@@ -282,9 +291,17 @@ apt-get install libopus0 ffmpeg
 
 ### 2.安装本项目依赖
 
+你先要下载本项目源码，源码可以通过`git clone`命令下载，如果你不熟悉`git clone`命令。
+
+你可以用浏览器打开这个地址`https://github.com/xinnan-tech/xiaozhi-esp32-server.git`
+
+打开完，找到页面中一个绿色的按钮，写着`Code`的按钮，点开它，然后你就看到`Download ZIP`的按钮。
+
+点击它，下载本项目源码压缩包。下载到你电脑后，解压它，此时它的名字可能叫`xiaozhi-esp32-server-main`
+你需要把它重命名成`xiaozhi-esp32-server`，好了请记住这个目录，我们暂且称它为`项目目录`。
+
 ```
-# 拉取本项目后进入本项目根目录
-cd xiaozhi-esp32-server
+# 使用dos或者终端，进入到你的项目目录，执行以下命令
 conda activate xiaozhi-esp32-server
 pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
 pip install -r requirements.txt

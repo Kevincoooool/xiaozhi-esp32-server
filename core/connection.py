@@ -15,8 +15,8 @@ from core.handle.textHandle import handleTextMessage
 from core.utils.util import get_string_no_punctuation_or_emoji
 from concurrent.futures import ThreadPoolExecutor, TimeoutError
 from core.handle.audioHandle import handleAudioMessage, sendAudioMessage
-from .auth import AuthMiddleware, AuthenticationError
-
+from config.private_config import PrivateConfig
+from core.auth import AuthMiddleware, AuthenticationError
 
 class ConnectionHandler:
     def __init__(self, config: Dict[str, Any], _vad, _asr, _llm, _tts):
@@ -73,6 +73,8 @@ class ConnectionHandler:
         for cmd in self.cmd_exit:
             if len(cmd) > self.max_cmd_length:
                 self.max_cmd_length = len(cmd)
+        
+        self.private_config = None
 
     async def handle_connection(self, ws):
         try:
@@ -82,6 +84,28 @@ class ConnectionHandler:
 
             # 进行认证
             await self.auth.authenticate(self.headers)
+
+            device_id = self.headers.get("device-id", None)
+            
+            # Load private configuration if device_id is provided
+            bUsePrivateConfig = self.config.get("use_private_config", False)
+            logging.info(f"bUsePrivateConfig: {bUsePrivateConfig}, device_id: {device_id}")
+            if bUsePrivateConfig and device_id:
+                self.private_config = PrivateConfig(device_id, self.config)
+                await self.private_config.load_or_create()
+                # Create private instances using private config
+                vad, asr, llm, tts = self.private_config.create_private_instances()
+                if vad is not None and asr is not None and llm is not None and tts is not None:
+                    self.vad = vad
+                    self.asr = asr
+                    self.llm = llm
+                    self.tts = tts
+
+                    self.logger.info(f"Loaded private config and instances for device {device_id}")
+                    self.private_config.update_last_chat_time()
+                else:
+                    self.logger.error(f"Failed to load private config for device {device_id}")
+                    self.private_config = None
 
             # 认证通过,继续处理
             self.websocket = ws
@@ -121,6 +145,8 @@ class ConnectionHandler:
 
     def _initialize_components(self):
         self.prompt = self.config["prompt"]
+        if self.private_config:
+            self.prompt = self.private_config.private_config.get("prompt", self.prompt)
         # 赋予LLM时间观念
         if "{date_time}" in self.prompt:
             date_time = time.strftime("%Y-%m-%d %H:%M", time.localtime())

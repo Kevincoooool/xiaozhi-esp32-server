@@ -1,3 +1,7 @@
+# 如果您是一名开发者，建议阅读以下内容。如果不是开发者，可以忽略这部分内容。
+# 在开发中，建议将【config.yaml】复制一份，改成【.config.yaml】。 系统会优先读取【.config.yaml】文件的配置。
+# 这样做，可以避免在提交代码的时候，错误地提交密钥信息，保护您的密钥安全。
+
 # 服务器基础配置(Basic server configuration)
 server:
   # 服务器监听地址和端口(Server listening address and port)
@@ -40,6 +44,9 @@ prompt: |
   如果用户希望结束对话，请在最后说“拜拜”或“再见”。
 # 使用完声音文件后删除文件(Delete the sound file when you are done using it)
 delete_audio: true
+
+# 是否启用私有配置(Enable private configuration),启用后可以每个设备有不同的配置
+use_private_config: false
 
 CMD_exit:
   - "退出"
@@ -167,3 +174,31 @@ TTS:
     output_file: tmp/
     access_token: 你的硅基流动API密钥
     response_format: wav
+  FishSpeech:
+    # 定义TTS API类型
+    #启动tts方法：
+    #python -m tools.api_server
+    #--listen 0.0.0.0:8080
+    #--llama-checkpoint-path "checkpoints/fish-speech-1.5"
+    #--decoder-checkpoint-path "checkpoints/fish-speech-1.5/firefly-gan-vq-fsq-8x1024-21hz-generator.pth"
+    #--decoder-config-name firefly_gan_vq
+    #--compile
+    type: fishspeech
+    output_file: tmp/
+    response_format: wav
+    reference_id: null
+    reference_audio: ["/tmp/test.wav",]
+    reference_text: ["你弄来这些吟词宴曲来看，还是这些混话来欺负我。",]
+    normalize: true
+    max_new_tokens: 1024
+    chunk_length: 200
+    top_p: 0.7
+    repetition_penalty: 1.2
+    temperature: 0.7
+    streaming: false
+    use_memory_cache: "on"
+    seed: null
+    channels: 1
+    rate: 44100
+    api_key: "YOUR_API_KEY"
+    api_url: "http://127.0.0.1:8080/v1/tts"
