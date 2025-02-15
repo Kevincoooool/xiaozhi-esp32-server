@@ -1,15 +1,11 @@
 import os
 import sys
-import json
 import logging
-import openai
-import requests
 import importlib
 from datetime import datetime
 from core.utils.util import is_segment
 from core.utils.util import get_string_no_punctuation_or_emoji
 from core.utils.util import read_config, get_project_dir
-from abc import ABC, abstractmethod
 
 logger = logging.getLogger(__name__)
 

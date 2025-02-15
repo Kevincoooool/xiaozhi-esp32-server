@@ -17,6 +17,12 @@ server:
     # 可选:设备白名单，如果设置了白名单，那么白名单的机器无论是什么token都可以连接。
     #allowed_devices:
     #  - "24:0A:C4:1D:3B:F0"  # MAC地址列表
+manager:
+  enabled: false
+  ip: 0.0.0.0
+  port: 8001
+  # 请把密码设置10位数，且不能包含xiaozhi这几个字符
+  password: 123456
 
 xiaozhi:
   type: hello
@@ -82,7 +88,7 @@ LLM:
     # 可在这里找到你的api key https://bigmodel.cn/usercenter/proj-mgmt/apikeys
     model_name: glm-4-flash
     url: https://open.bigmodel.cn/api/paas/v4/
-    api_key: 你的ChatGLMLLM api key
+    api_key: 你的chat-glm api key
   OllamaLLM:
     # 定义LLM API类型
     type: ollama
@@ -102,6 +108,14 @@ LLM:
     user_id: 你的user_id
     base_url:   # 服务地址
     personal_access_token: 你的coze个人令牌
+  GeminiLLM:
+    type: gemini
+    # 谷歌Gemini API，需要先在Google Cloud控制台创建API密钥并获取api_key
+    # 若在中国境内使用，请遵守《生成式人工智能服务管理暂行办法》
+    # token申请地址： https://aistudio.google.com/apikey
+    # 若部署地无法访问接口，需要开启科学上网
+    api_key: 你的gemini api key
+    model_name: "gemini-1.5-pro"  #  gemini-1.5-pro 是免费的
 TTS:
   # 当前支持的type为edge、doubao，可自行适配
   EdgeTTS:
@@ -144,3 +158,12 @@ TTS:
     parallel_infer: true
     repetition_penalty: 1.35
     aux_ref_audio_paths: []
+  CosyVoiceSiliconflow:
+    type: siliconflow
+    # 硅基流动TTS
+    # token申请地址 https://cloud.siliconflow.cn/account/ak
+    model: FunAudioLLM/CosyVoice2-0.5B
+    voice: FunAudioLLM/CosyVoice2-0.5B:alex
+    output_file: tmp/
+    access_token: 你的硅基流动API密钥
+    response_format: wav

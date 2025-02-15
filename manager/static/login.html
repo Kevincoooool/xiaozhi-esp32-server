@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+    <script src="js/vue3.5.13.js"></script>
+    <link rel="stylesheet" href="css/element-plus2.9.4.css">
+    <script src="js/element-plus2.9.4.js"></script>
+    <script src="js/icons-vue2.3.1.js"></script>
+    <script src="js/common.js"></script>
+    <title>小智-server</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #1a1f25 0%, #0d1117 100%);
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        .header {
+            background: rgba(13, 17, 23, 0.8);
+            backdrop-filter: blur(10px);
+            color: #fff;
+            padding: 1.5rem 2rem;
+            font-size: 1.4rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-logo {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(45deg, #00c6fb 0%, #005bea 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .login-container {
+            max-width: 440px;
+            margin: 60px auto;
+            padding: 2.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .login-title {
+            font-size: 28px;
+            color: #fff;
+            margin-bottom: 40px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .login-form {
+            margin-top: 20px;
+        }
+
+        .custom-input :deep(.el-input__wrapper) {
+            background: rgba(255, 255, 255, 0.05) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            box-shadow: none !important;
+        }
+
+        .custom-input :deep(.el-input__inner) {
+            color: #fff !important;
+        }
+
+        .custom-button {
+            background: linear-gradient(45deg, #00c6fb 0%, #005bea 100%) !important;
+            border: none !important;
+            height: 44px !important;
+            font-size: 16px !important;
+            font-weight: 500 !important;
+            letter-spacing: 1px;
+            transition: all 0.3s ease !important;
+        }
+
+        .custom-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 198, 251, 0.3) !important;
+        }
+
+        .footer {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 13px;
+            padding: 20px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+
+        @keyframes gradient {
+            0% {
+                background-position: 0% 50%
+            }
+            50% {
+                background-position: 100% 50%
+            }
+            100% {
+                background-position: 0% 50%
+            }
+        }
+
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(-45deg, #1a1f25, #0d1117, #162030, #1c1c1c);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <div class="animated-bg"></div>
+    <div class="header">
+        <div class="header-logo">AI</div>
+        xiaozhi-esp32-server
+    </div>
+    <div class="login-container">
+        <h2 class="login-title">安全验证</h2>
+        <div class="login-form">
+            <el-form :model="form" size="large">
+                <el-form-item>
+                    <el-input
+                            class="custom-input"
+                            v-model="form.password"
+                            type="password"
+                            placeholder="请输入访问密码"
+                            show-password>
+                    </el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-button class="custom-button" type="primary" style="width: 100%" @click="handleLogin">
+                        验证并进入系统
+                    </el-button>
+                </el-form-item>
+            </el-form>
+        </div>
+    </div>
+    <div class="footer">
+        © 2025 xiaozhi-esp32-server
+    </div>
+</div>
+<script>
+    const {ElMessage} = ElementPlus;
+    const App = {
+        data() {
+            return {
+                form: {
+                    password: ''
+                }
+            };
+        },
+        methods: {
+            handleLogin() {
+                let that = this;
+                post('/api/login', that.form, function (data) {
+                    if (data.code === -1) {
+                        // 弹出错误提示
+                        ElMessage({
+                            message: '登录失败，请检查您的密码',
+                            type: 'error'
+                        });
+                        localStorage.removeItem('token');
+                    } else {
+                        // 登录成功时的处理逻辑
+                        ElMessage({
+                            message: '登录成功',
+                            type: 'success'
+                        });
+                        localStorage.setItem('token', that.form.password); // 设置登录状态为已登录
+                        location.href = 'index.html'; // 跳转到主页
+                    }
+                })
+            }
+        },
+        mounted() {
+            // 在页面加载时自动调用 handleLogin 方法
+            let token = localStorage.getItem('token')
+            if (token) {
+                this.form.password = token;
+                this.handleLogin();
+            }
+        }
+    };
+    const app = Vue.createApp(App);
+    app.use(ElementPlus);
+    app.mount("#app");
+</script>
+</body>
+</html>

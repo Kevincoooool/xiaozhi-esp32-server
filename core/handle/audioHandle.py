@@ -37,28 +37,6 @@ async def handleAudioMessage(conn, audio):
         conn.asr_audio.clear()
         conn.reset_vad_states()
 
-async def handleCMDMessage(conn, text):
-    cmd_exit = conn.cmd_exit
-    for cmd in cmd_exit:
-        if text == cmd:
-            logger.info("识别到明确的退出命令".format(text))
-            await finishToChat(conn)
-            return True
-    return False
-
-async def finishToChat(conn):
-    await conn.close()
-
-async def isLLMWantToFinsih(conn):
-    first_text = conn.tts_first_text
-    last_text = conn.tts_last_text
-    _, last_text_without_punctuation = remove_punctuation_and_length(last_text)
-    if "再见" in last_text_without_punctuation or "拜拜" in last_text_without_punctuation:
-        return True
-    _, first_text_without_punctuation  = remove_punctuation_and_length(first_text)
-    if "再见" in first_text_without_punctuation or "拜拜" in first_text_without_punctuation:
-        return True
-    return False
 
 async def handleCMDMessage(conn, text):
     cmd_exit = conn.cmd_exit

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+    <script src="js/vue3.5.13.js"></script>
+    <link rel="stylesheet" href="css/element-plus2.9.4.css">
+    <script src="js/element-plus2.9.4.js"></script>
+    <script src="js/icons-vue2.3.1.js"></script>
+    <script src="js/common.js"></script>
+    <title>小智-server</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #1a1f25 0%, #0d1117 100%);
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        .header {
+            background: rgba(13, 17, 23, 0.8);
+            backdrop-filter: blur(10px);
+            color: #fff;
+            padding: 1.5rem 2rem;
+            font-size: 1.4rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-logo {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(45deg, #00c6fb 0%, #005bea 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .content-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 2rem;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        .role-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .role-id {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        .role-description {
+            margin: 1rem 0;
+        }
+
+        .character-count {
+            text-align: right;
+            color: #999;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        .button-group {
+            margin-top: 1rem;
+        }
+
+        .note {
+            color: #909399;
+            font-size: 12px;
+            margin-top: 1rem;
+        }
+
+        .footer {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 13px;
+            padding: 20px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <div class="animated-bg"></div>
+    <div class="header">
+        <div class="header-logo">AI</div>
+        xiaozhi-esp32-server
+    </div>
+
+    <div class="content-container">
+        <div class="role-title">配置角色：</div>
+        <div class="role-id">cc:ba:97:11:a6:ac</div>
+
+        <div class="role-description">角色介绍</div>
+        <el-input
+                type="textarea"
+                v-model="form.prompt"
+                :rows="6"
+                resize="vertical"
+                @input="updateCharCount"
+        ></el-input>
+        <div class="character-count">{{ charCount }} / 2000</div>
+
+        <div class="button-group">
+            <el-button type="primary" @click="savePrompt">保存配置</el-button>
+            <el-button @click="resetPrompt">重置</el-button>
+        </div>
+
+        <div class="note">注意：保存配置后，需要重启设备，新的配置才会生效。</div>
+    </div>
+
+    <div class="footer">
+        © 2025 xiaozhi-esp32-server
+    </div>
+</div>
+
+<script>
+    const {ElMessage} = ElementPlus;
+    const App = {
+        data() {
+            return {
+                form: {
+                    prompt: ''
+                },
+                charCount: 0
+            };
+        },
+        methods: {
+            loadPrompt() {
+                let that = this;
+                that.form.prompt = '';
+                get('/api/prompt', function (data) {
+                    if (data.code === -1) {
+                        ElMessage({
+                            message: data.msg,
+                            type: 'error'
+                        });
+                    } else {
+                        that.form.prompt = data.prompt;
+                        that.updateCharCount();
+                    }
+                })
+            },
+            updateCharCount() {
+                this.charCount = this.form.prompt.length;
+            },
+            savePrompt() {
+                post('/api/prompt', {prompt: this.form.prompt}, (data) => {
+                    if (data.code === 0) {
+                        ElMessage({
+                            message: '保存成功',
+                            type: 'success'
+                        });
+                        this.loadPrompt();
+                    } else {
+                        ElMessage({
+                            message: data.msg || '保存失败',
+                            type: 'error'
+                        });
+                    }
+                });
+            }
+        },
+        mounted() {
+            this.loadPrompt();
+        }
+    };
+    const app = Vue.createApp(App);
+    app.use(ElementPlus);
+    app.mount("#app");
+</script>
+</body>
+</html>
