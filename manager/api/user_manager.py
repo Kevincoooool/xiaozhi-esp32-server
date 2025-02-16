@@ -2,12 +2,14 @@ import os
 import yaml
 import hashlib
 import logging
+from core.utils.util import get_project_dir
 
 logger = logging.getLogger(__name__)
 
+
 class UserManager:
     def __init__(self):
-        self.secrets_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.secrets.yaml')
+        self.secrets_path = get_project_dir() + 'data/.secrets.yaml'
         self.users = {}
         self.ensure_secrets_file()
         self.load_user_data()

@@ -2,7 +2,6 @@ import os
 import yaml
 import logging
 from aiohttp import web
-from typing import Dict, Any
 from core.utils.util import get_project_dir
 from config.private_config import PrivateConfig
 
@@ -10,11 +9,11 @@ logger = logging.getLogger(__name__)
 
 class ConfigHandler:
     def __init__(self):
-        self.private_config_path = get_project_dir() + '.private_config.yaml'
+        self.private_config_path = get_project_dir() + 'data/.private_config.yaml'
         self.config_path = get_project_dir() + 'config.yaml'
         # 如果存在.config.yaml文件，则使用该文件
-        if os.path.exists(get_project_dir() + ".config.yaml"):
-            self.config_path = get_project_dir() + ".config.yaml"
+        if os.path.exists(get_project_dir() + "data/.config.yaml"):
+            self.config_path = get_project_dir() + "data/.config.yaml"
         with open(self.config_path, 'r', encoding='utf-8') as f:
                 self.config = yaml.safe_load(f)
 

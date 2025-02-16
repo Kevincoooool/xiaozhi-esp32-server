@@ -11,7 +11,7 @@ class PrivateConfig:
     def __init__(self, device_id: str, default_config: Dict[str, Any]):
         self.device_id = device_id
         self.default_config = default_config
-        self.config_path = get_project_dir() + '.private_config.yaml'
+        self.config_path = get_project_dir() + 'data/.private_config.yaml'
         self.logger = logging.getLogger(__name__)
         self.private_config = {}
 

@@ -105,7 +105,7 @@ def check_password(password):
     :return: 如果密码满足条件，则返回True；否则返回False。
     """
     # 检查密码长度
-    if len(password) < 10:
+    if len(password) < 8:
         return False
 
     # 检查是否包含英文字符和数字
@@ -116,7 +116,7 @@ def check_password(password):
     if "xiaozhi" in password:
         return False
 
-    if "123456" in password:
+    if "1234" in password:
         return False
 
     # 如果满足所有条件，则返回True

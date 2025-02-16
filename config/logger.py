@@ -3,9 +3,10 @@ import sys
 import os
 
 
-def setup_logging(log_dir='tmp'):
+def setup_logging(log_dir='tmp', data_dir='data'):
     """配置全局日志"""
     os.makedirs(log_dir, exist_ok=True)
+    os.makedirs(data_dir, exist_ok=True)
 
     logging.basicConfig(
         level=logging.INFO,
