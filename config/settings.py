@@ -7,8 +7,8 @@ from core.utils.util import read_config, get_project_dir
 def get_config_file():
     default_config_file = "config.yaml"
     # 判断是否存在私有的配置文件
-    if os.path.exists(get_project_dir() + "." + default_config_file):
-        default_config_file = "." + default_config_file
+    if os.path.exists(get_project_dir() + "data/." + default_config_file):
+        default_config_file = "data/." + default_config_file
     return default_config_file
 
 

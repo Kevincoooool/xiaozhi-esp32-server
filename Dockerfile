@@ -1,7 +1,10 @@
 # 第一阶段：前端构建
-FROM node:18 as frontend-builder
+FROM node:18 AS frontend-builder
 
 WORKDIR /app/ZhiKongTaiWeb
+
+# 配置npm使用淘宝源
+RUN npm config set registry https://registry.npmmirror.com
 
 COPY ZhiKongTaiWeb/package*.json ./
 
@@ -12,7 +15,7 @@ COPY ZhiKongTaiWeb .
 RUN npm run build
 
 # 第二阶段：构建Python依赖
-FROM python:3.10-slim as builder
+FROM python:3.10-slim AS builder
 
 WORKDIR /app
 
@@ -58,8 +61,7 @@ RUN rm -rf /etc/apt/sources.list.d/* && \
 
 # 从构建阶段复制虚拟环境和前端构建产物
 COPY --from=builder /opt/venv /opt/venv
-COPY --from=frontend-builder /app/ZhiKongTaiWeb/dist /opt/xiaozhi-esp32-server/manager/static
-
+COPY --from=frontend-builder /app/ZhiKongTaiWeb/dist /opt/xiaozhi-esp32-server/manager/static/webui
 # 设置虚拟环境路径
 ENV PATH="/opt/venv/bin:$PATH"
 

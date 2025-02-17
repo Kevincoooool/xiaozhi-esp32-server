@@ -18,8 +18,10 @@ async def handleAudioMessage(conn, audio):
 
     # 如果本次没有声音，本段也没声音，就把声音丢弃了
     if have_voice == False and conn.client_have_voice == False:
+        await no_voice_close_connect(conn)
         conn.asr_audio.clear()
         return
+    conn.client_no_voice_last_time = 0.0
     conn.asr_audio.append(audio)
     # 如果本段有声音，且已经停止了
     if conn.client_voice_stop:
@@ -146,3 +148,16 @@ async def schedule_with_interrupt(delay, coro):
         await coro
     except asyncio.CancelledError:
         pass
+
+
+async def no_voice_close_connect(conn):
+    if conn.client_no_voice_last_time == 0.0:
+        conn.client_no_voice_last_time = time.time() * 1000
+    else:
+        no_voice_time = time.time() * 1000 - conn.client_no_voice_last_time
+        close_connection_no_voice_time = conn.config.get("close_connection_no_voice_time", 120)
+        if no_voice_time > 1000 * close_connection_no_voice_time:
+            conn.client_abort = False
+            conn.asr_server_receive = False
+            prompt = "时间过得真快，我都好久没说话了。请你用十个字左右话跟我告别，以“再见”或“拜拜拜”为结尾"
+            await startToChat(conn, prompt)

@@ -21,6 +21,10 @@
           <button class="action-button github-button" @click="openGithubServer">
             <i class="icon-github"></i> Github服务端
           </button>
+
+          <button class="action-button github-button" @click="openGithubWeb">
+            <i class="icon-github"></i> Web客户端
+          </button>
           
           <button class="action-button control-panel-button" @click="enterPanel">
             <i class="icon-control-panel"></i> 控制台
@@ -33,7 +37,9 @@
 
 <script setup>
 import NavBar from './NavBar.vue';
-const emit = defineEmits(['enter-panel']);
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 const openTutorial = () => {
   window.open('https://ccnphfhqs21z.feishu.cn/wiki/F5krwD16viZoF0kKkvDcrZNYnhb', '_blank');
@@ -47,13 +53,17 @@ const openGithubServer = () => {
   window.open('https://github.com/xinnan-tech/xiaozhi-esp32-server', '_blank');
 };
 
+const openGithubWeb = () => {
+  window.open('https://github.com/TOM88812/xiaozhi-web-client', '_blank');
+};
+
 const enterPanel = () => {
-  emit('enter-panel');
+  router.push('/panel');
 };
 
 const handleTabChange = (tab) => {
   if (tab === 'device') {
-    emit('enter-panel');
+    router.push('/panel');
   }
 };
 </script>

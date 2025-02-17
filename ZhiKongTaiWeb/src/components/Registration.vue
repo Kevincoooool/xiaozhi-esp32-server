@@ -18,72 +18,66 @@
     </form>
     <p>
       已有账号？
-      <a href="#" @click.prevent="$emit('show-login')">点击登录</a>
+      <router-link to="/login">点击登录</router-link>
     </p>
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { API_BASE_URL } from '../config/api';
 
-export default {
-  data() {
-    return {
-      username: '',
-      password: '',
-      confirmPassword: '',
-      isLoading: false
-    };
-  },
-  methods: {
-    async handleRegistration() {
-      if (this.password !== this.confirmPassword) {
-        alert('密码不匹配，请重试！');
-        return;
-      }
+const router = useRouter();
+const username = ref('');
+const password = ref('');
+const confirmPassword = ref('');
+const isLoading = ref(false);
 
-      if (!this.username || !this.password) {
-        alert('用户名和密码不能为空！');
-        return;
-      }
+const handleRegistration = async () => {
+  if (password.value !== confirmPassword.value) {
+    alert('密码不匹配，请重试！');
+    return;
+  }
 
-      this.isLoading = true;
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/register`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            username: this.username,
-            password: this.password
-          })
-        });
+  if (!username.value || !password.value) {
+    alert('用户名和密码不能为空！');
+    return;
+  }
 
-        const data = await response.json();
-        
-        if (data.success) {
-          alert('注册成功！即将跳转到登录页面。');
-          // 清空表单数据
-          this.username = '';
-          this.password = '';
-          this.confirmPassword = '';
-          
-          // 延迟跳转到登录页面
-          setTimeout(() => {
-            this.$emit('show-login');
-          }, 100);
-        } else {
-          alert(data.message || '注册失败');
-        }
-      } catch (error) {
-        console.error('Registration error:', error);
-        alert('注册失败，请检查网络连接');
-      } finally {
-        this.isLoading = false;
-      }
-    },
-  },
+  isLoading.value = true;
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        username: username.value,
+        password: password.value
+      })
+    });
+
+    const data = await response.json();
+    
+    if (data.success) {
+      alert('注册成功！即将跳转到登录页面。');
+      // 清空表单数据
+      username.value = '';
+      password.value = '';
+      confirmPassword.value = '';
+      
+      // 使用路由导航到登录页面
+      router.push('/login');
+    } else {
+      alert(data.message || '注册失败');
+    }
+  } catch (error) {
+    console.error('Registration error:', error);
+    alert('注册失败，请检查网络连接');
+  } finally {
+    isLoading.value = false;
+  }
 };
 </script>
 

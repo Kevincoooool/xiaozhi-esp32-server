@@ -3,7 +3,7 @@
     <NavBar current-tab="device" @tab-change="handleTabChange"/>
     <main class="content">
       <div class="breadcrumb">
-        <router-link to="/control-panel">控制台</router-link> /
+        <router-link to="/">首页</router-link> /
         <span>设备管理</span>
       </div>
       
@@ -39,21 +39,20 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import NavBar from './NavBar.vue';
 import DeviceCard from './DeviceCard.vue';
 import { API_BASE_URL } from '../config/api';
 
-const emit = defineEmits(['show-role', 'go-home']);
-
+const router = useRouter();
 const baseUrl = API_BASE_URL;
 const devices = ref([]);
 
 const formatLastActivity = (timestamp) => {
-  console.log('Formatting timestamp:', timestamp);
   if (!timestamp) return '从未对话';
   
   const now = Date.now();
-  const lastChat = timestamp * 1000; // Convert to milliseconds
+  const lastChat = timestamp * 1000;
   const diffMinutes = Math.floor((now - lastChat) / (1000 * 60));
   
   if (diffMinutes < 60) {
@@ -69,10 +68,8 @@ const formatLastActivity = (timestamp) => {
   return `${diffDays} 天前`;
 };
 
-// Event handlers
 const handleRoleConfig = (device) => {
-  console.log('Configure device:', device.id);
-  emit('show-role', device.id); 
+  router.push(`/role-setting/${device.id}`);
 };
 
 const handleVoiceprint = (device) => {
@@ -108,7 +105,7 @@ const handleDelete = async (device) => {
 
 const handleTabChange = (tab) => {
   if (tab === 'home') {
-    emit('go-home');
+    router.push('/');
   }
 };
 
@@ -118,7 +115,6 @@ onMounted(async () => {
     const response = await fetch(`${baseUrl}/api/config/devices`);
     const data = await response.json();
     if (data.success) {
-      console.log('Loaded devices:', data.data);
       devices.value = data.data.map(device => ({
         ...device,
         type: '面包板（WiFi）',

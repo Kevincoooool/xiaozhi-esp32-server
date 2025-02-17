@@ -7,7 +7,7 @@ export default defineConfig({
     server: {
         open: true, // 自动启动浏览器
         host: "0.0.0.0", // localhost
-        port: 8001, // 端口号
+        port: 8002, // 端口号
         https: false,
         hmr: {overlay: false},
         proxy: {
@@ -16,5 +16,6 @@ export default defineConfig({
                 changeOrigin: true
             }
         }
-    }
+    },
+    base: '/'
 })

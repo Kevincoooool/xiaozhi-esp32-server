@@ -4,8 +4,8 @@
 
     <!-- Breadcrumb -->
     <div class="breadcrumb">
-      <router-link to="/control-panel">控制台</router-link> /
-      <router-link to="/device-management">设备管理</router-link> /
+      <router-link to="/">首页</router-link> /
+      <router-link to="/panel">设备管理</router-link> /
       <span>配置角色</span>
     </div>
 
@@ -107,12 +107,16 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import NavBar from './NavBar.vue';
 import RoleTemplates from '../utils/RoleTemplates';
 import { API_BASE_URL } from '../config/api';
 
-const roleTemplates = RoleTemplates.getTemplates();
+const router = useRouter();
+const route = useRoute();
+const deviceId = ref(route.params.deviceId);
 
+const roleTemplates = RoleTemplates.getTemplates();
 const nickname = ref('小智');
 const selectedTemplate = ref('');
 const selectedVoice = ref('qingchun');
@@ -144,29 +148,11 @@ const selectTemplate = (templateId) => {
   }
 };
 
-const emit = defineEmits(['back-to-panel']);
-
-const handleBack = () => {
-  console.log('Triggering back-to-panel event'); // 添加调试日志
-  emit('back-to-panel');
-};
-
 const handleTabChange = (tab) => {
   if (tab === 'device' || tab === 'home') {
-    emit('back-to-panel');
+    router.push('/panel');
   }
 };
-
-// 修改deviceId的定义，接收props
-const props = defineProps({
-  deviceId: {
-    type: String,
-    required: true
-  }
-});
-
-// 使用props中的deviceId替换原来的静态值
-const deviceId = ref(props.deviceId);
 
 const loadModuleOptions = async () => {
   try {
@@ -208,7 +194,7 @@ const saveConfig = async () => {
 
     // Prepare the configuration including full module settings
     const config = {
-      id: props.deviceId,
+      id: deviceId.value,
       config: {
         selected_module: selectedModules.value,
         prompt: processedDescription,
@@ -233,7 +219,7 @@ const saveConfig = async () => {
     const data = await response.json();
     if (data.success) {
       // Save the original description and nickname to local storage
-      localStorage.setItem(`deviceConfig_${props.deviceId}`, JSON.stringify({
+      localStorage.setItem(`deviceConfig_${deviceId.value}`, JSON.stringify({
         selected_module: selectedModules.value,
         prompt: roleDescription.value,
         nickname: nickname.value
@@ -251,7 +237,7 @@ const saveConfig = async () => {
 const loadDeviceConfig = async () => {
   try {
     // First try to get config from local storage
-    const localConfig = localStorage.getItem(`deviceConfig_${props.deviceId}`);
+    const localConfig = localStorage.getItem(`deviceConfig_${deviceId.value}`);
     if (localConfig) {
       const config = JSON.parse(localConfig);
       selectedModules.value = config.selected_module || {};
@@ -264,14 +250,14 @@ const loadDeviceConfig = async () => {
     const response = await fetch(`${baseUrl}/api/config/devices`);
     const data = await response.json();
     if (data.success) {
-      const deviceConfig = data.data.find(d => d.id === props.deviceId);
+      const deviceConfig = data.data.find(d => d.id === deviceId.value);
       if (deviceConfig) {
         selectedModules.value = deviceConfig.config.selected_module || {};
         roleDescription.value = deviceConfig.config.prompt || '';
         nickname.value = deviceConfig.config.nickname || '小智'; // Load nickname from server
         
         // Save to local storage
-        localStorage.setItem(`deviceConfig_${props.deviceId}`, JSON.stringify({
+        localStorage.setItem(`deviceConfig_${deviceId.value}`, JSON.stringify({
           selected_module: deviceConfig.config.selected_module,
           prompt: deviceConfig.config.prompt,
           nickname: deviceConfig.config.nickname
@@ -297,7 +283,7 @@ const resetConfig = async () => {
 
 <style scoped>
 .app-container {
-  height: 100%;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   background-color: #f5f7fa;
@@ -313,7 +299,9 @@ const resetConfig = async () => {
   max-width: 1000px;
   margin: 0 auto;
   padding: 16px 24px;
-  overflow: auto;
+  width: 100%;
+  overflow-y: auto;
+  height: calc(100vh - 120px); /* 减去头部和面包屑的高度 */
 }
 
 .page-title {
@@ -327,6 +315,7 @@ const resetConfig = async () => {
   border-radius: 4px;
   padding: 20px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
 }
 
 .form-group {

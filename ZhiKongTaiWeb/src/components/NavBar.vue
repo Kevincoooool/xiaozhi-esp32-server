@@ -1,8 +1,8 @@
 <template>
   <header class="header">
-    <div class="nav-item" :class="{ active: currentTab === 'home' }" @click="switchTab('home')">小智 AI</div>
+    <div class="nav-item" :class="{ active: $route.path === '/' }" @click="switchTab('/')">小智 AI</div>
     <nav class="nav">
-      <div class="nav-item" :class="{ active: currentTab === 'device' }" @click="switchTab('device')">
+      <div class="nav-item" :class="{ active: $route.path === '/panel' }" @click="switchTab('/panel')">
         <i class="icon-device"></i> 设备管理
       </div>
     </nav>
@@ -10,14 +10,13 @@
 </template>
 
 <script setup>
-const props = defineProps({
-  currentTab: String
-});
+import { useRouter, useRoute } from 'vue-router';
 
-const emit = defineEmits(['tab-change']);
+const router = useRouter();
+const route = useRoute();
 
-const switchTab = (tab) => {
-  emit('tab-change', tab);
+const switchTab = (path) => {
+  router.push(path);
 };
 </script>
 

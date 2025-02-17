@@ -7,14 +7,14 @@ from core.providers.llm.base import LLMProviderBase
 logger = logging.getLogger(__name__)
 
 # 定义用于匹配中文标点符号的正则表达式（包括句号、感叹号、问号、分号）
-punctuation_pattern = re.compile(r'([<,.，.?。！？；：])')
+punctuation_pattern = re.compile(r'([。！？；])')
 
 class LLMProvider(LLMProviderBase):
     def __init__(self, config):
         self.personal_access_token = config.get("personal_access_token")
         self.bot_id = config.get("bot_id")
         self.user_id = config.get("user_id")  # 默认用户 ID
-        self.base_url = "https://api.coze.cn/open_api/v2/chat"
+        self.base_url = config.get("base_url")
 
     def response(self, session_id, dialogue):
         try:

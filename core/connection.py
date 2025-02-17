@@ -52,6 +52,7 @@ class ConnectionHandler:
         self.client_audio_buffer = bytes()
         self.client_have_voice = False
         self.client_have_voice_last_time = 0.0
+        self.client_no_voice_last_time = 0.0
         self.client_voice_stop = False
 
         # asr相关变量
