@@ -7,7 +7,7 @@ from core.providers.llm.base import LLMProviderBase
 logger = logging.getLogger(__name__)
 
 # 定义用于匹配中文标点符号的正则表达式（包括句号、感叹号、问号、分号）
-punctuation_pattern = re.compile(r'([。！？；])')
+punctuation_pattern = re.compile(r'([<,.，.?。！？；：])')
 
 class LLMProvider(LLMProviderBase):
     def __init__(self, config):
