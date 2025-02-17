@@ -25,7 +25,7 @@ server:
 manager:
   # 是否启用管理后台
   # 目前这个模块还在开发中，建议：不要修改enabled选项
-  enabled: false
+  enabled: true
   ip: 0.0.0.0
   port: 8002
 
@@ -128,13 +128,7 @@ LLM:
     # 若部署地无法访问接口，需要开启科学上网
     api_key: 你的gemini api key
     model_name: "gemini-1.5-pro"  #  gemini-1.5-pro 是免费的
-  CozeLLM:
-    # 定义LLM API类型
-    type: coze
-    bot_id: 你的bot_id
-    user_id: 你的user_id
-    base_url: "https://api.coze.cn/open_api/v2/chat" # 服务地址
-    personal_access_token: 你的coze个人令牌
+
 TTS:
   # 当前支持的type为edge、doubao，可自行适配
   EdgeTTS:
